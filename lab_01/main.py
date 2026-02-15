@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from utils import CANVAS_WIDTH, CANVAS_HEIGHT, draw_triangle, draw_line, Dot
 
 parsed_dots = []
+triangles = []
 
 
 def handle_parse():
@@ -78,6 +79,8 @@ tree.column("number", width=50, anchor="center")
 tree.column("x", width=100, anchor="center")
 tree.column("y", width=100, anchor="center")
 tree.pack(fill="both", expand=True)
+solve_button = tk.Button(middle_frame, text="Solve", cursor="hand2", background="#2bff00", command=)
+solve_button.pack(fill="x", side="bottom")
 
 # 3. RIGHT COLUMN: Random Text + Canvas
 right_frame = tk.Frame(main_container, padx=10, pady=10)

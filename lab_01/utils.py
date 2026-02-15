@@ -41,6 +41,33 @@ def draw_triangle(d1: Dot, d2: Dot, d3: Dot, plot_func, color="#FFFFFF"):
     draw_line(d3, d1, plot_with_color)
 
 
+def update_limits(parsed_dots):
+    if not parsed_dots:
+        return
+
+    # Extract all x and y coordinates
+    xs = [dot.x for dot in parsed_dots]
+    ys = [dot.y for dot in parsed_dots]
+
+    min_x, max_x = min(xs), max(xs)
+    min_y, max_y = min(ys), max(ys)
+
+    # Handle the "zero range" case (when all dots are on the same line or are a single point)
+    if min_x == max_x and min_y == max_y:
+        min_x -= 0.5
+        max_x += 0.5
+        min_y -= 0.5
+        max_y += 0.5
+
+    # Update the global camera_config
+    camera_config['min_x'] = min_x
+    camera_config['max_x'] = max_x
+    camera_config['min_y'] = min_y
+    camera_config['max_y'] = max_y
+
+    print(f"Limits updated: X({min_x}, {max_x}), Y({min_y}, {max_y})")
+
+
 # Internal functions below
 
 
@@ -53,7 +80,12 @@ def convert_to_canvas_navigation(x0, y0, config):
     area_width = config['max_x'] - config['min_x']
     area_height = config['max_y'] - config['min_y']
 
-    scale = min(canvas_drawable_area[1] / area_height, canvas_drawable_area[0] / area_width)
+    if area_width == 0:
+        scale = canvas_drawable_area[1] / area_height
+    elif area_height == 0:
+        scale = canvas_drawable_area[0] / area_width
+    else:
+        scale = min(canvas_drawable_area[1] / area_height, canvas_drawable_area[0] / area_width)
 
     canvas_center = (CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2)
     area_center = ((config['max_x'] - config['min_x']) / 2, (config['max_y'] - config['min_y']) / 2)
