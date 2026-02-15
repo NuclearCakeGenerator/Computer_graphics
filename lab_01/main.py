@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from utils import CANVAS_WIDTH, CANVAS_HEIGHT, draw_triangle, draw_line, Dot
+from itertools import combinations
+
+from lab_01.utils import show_content
+from utils import CANVAS_WIDTH, CANVAS_HEIGHT, draw_triangle, Dot, Triangle, update_limits
 
 parsed_dots = []
 triangles = []
@@ -29,7 +32,7 @@ def handle_parse():
             x = float(parts[0])
             y = float(parts[1])
 
-            dot = Dot(x, y)
+            dot = Dot(x, y, len(parsed_dots))
             parsed_dots.append(dot)
 
             # Display in table: (Number, X, Y)
@@ -38,12 +41,70 @@ def handle_parse():
 
         info_field.delete(0, tk.END)
         info_field.insert(0, f"Successfully parsed {len(parsed_dots)} dots.")
+
+        global triangles
+        triangles = []
+        show_content(parsed_dots, triangles, put_pixel, img, canvas)
+
         return
 
     except ValueError as e:
         # Requirement: Display message for incorrect data
         messagebox.showerror("Input Error", f"Invalid format on line {i + 1}.\nUse: x, y\nError: {e}")
         return
+
+
+def solve_task():
+    if len(parsed_dots) < 6:  # Need at least 4 dots for one triangle inside another
+        messagebox.showinfo("Result", "Need at least 6 dots to find a solution.")
+        return
+
+    best_outer = None
+    best_inner = None
+    min_outer_area = float('inf')
+    min_inner_area = float('inf')
+
+    # 1. Generate all possible triangles (Full search)
+    all_possible_triangles = []
+    for combo in combinations(parsed_dots, 3):
+        t = Triangle(*combo)
+        if t.area > 1e-9:  # Ignore degenerate triangles
+            all_possible_triangles.append(t)
+
+    # 2. Compare pairs of triangles
+    for t_outer in all_possible_triangles:
+        if t_outer.area > min_outer_area:
+            continue
+
+        for t_inner in all_possible_triangles:
+            if t_outer == t_inner:
+                continue
+
+            # Check if t_inner is strictly inside t_outer
+            # All vertices of inner must be inside outer
+            if (t_outer.is_dot_inside(t_inner.a) and
+                    t_outer.is_dot_inside(t_inner.b) and
+                    t_outer.is_dot_inside(t_inner.c)):
+
+                # Check priority criteria
+                if (t_outer.area < min_outer_area) or (
+                        abs(t_outer.area - min_outer_area) < 1e-9 and t_inner.area < min_inner_area):
+                    min_outer_area = t_outer.area
+                    min_inner_area = t_inner.area
+                    best_outer = t_outer
+                    best_inner = t_inner
+
+    if not best_outer or not best_inner:
+        messagebox.showinfo("Result", "No solution found where one triangle is strictly inside another.")
+        return
+
+    global triangles
+    triangles = [best_outer, best_inner]
+    result_text = f"Outer Area: {min_outer_area:.2f}, Inner Area: {min_inner_area:.2f}"
+    info_field.delete(0, tk.END)
+    info_field.insert(0, result_text)
+
+    show_content(parsed_dots, triangles, put_pixel, img, canvas)
 
 
 LEFT_PANEL_WIDTH = 300
@@ -79,7 +140,7 @@ tree.column("number", width=50, anchor="center")
 tree.column("x", width=100, anchor="center")
 tree.column("y", width=100, anchor="center")
 tree.pack(fill="both", expand=True)
-solve_button = tk.Button(middle_frame, text="Solve", cursor="hand2", background="#2bff00", command=)
+solve_button = tk.Button(middle_frame, text="Solve", cursor="hand2", background="#2bff00", command=solve_task)
 solve_button.pack(fill="x", side="bottom")
 
 # 3. RIGHT COLUMN: Random Text + Canvas
@@ -97,11 +158,18 @@ img = tk.PhotoImage(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
 canvas.create_image((0, 0), image=img, anchor="nw")
 
 
-def put_pixel(x, y, color="#FFFFFF"):
+def put_pixel(x, y, color="#FFFFFF", text: str = ""):
     if 0 <= x < CANVAS_WIDTH and 0 <= y < CANVAS_HEIGHT:
-        img.put(color, (x, y))
+        if not text:
+            img.put(color, (x, y))
+        else:
+            canvas.create_text(
+                x,
+                y,
+                text=text,
+                fill=color,
+                anchor="sw"
+            )
 
-
-draw_line(Dot(50, 50), Dot(100, 150), put_pixel)
 
 root.mainloop()

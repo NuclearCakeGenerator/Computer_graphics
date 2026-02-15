@@ -1,4 +1,6 @@
-CANVAS_WIDTH, CANVAS_HEIGHT, CANVAS_INTERNAL_PADDING = 1100, 900, 30
+CANVAS_WIDTH = 1100
+CANVAS_HEIGHT = 900
+CANVAS_INTERNAL_PADDING = 30
 
 camera_config = {
     'max_x': 310,
@@ -6,6 +8,39 @@ camera_config = {
     'max_y': 60,
     'min_y': 50,
 }
+
+
+def show_content(dots, triangles, plot_func, photo_image, canvas):
+    photo_image.put("#000000", to=(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT))
+    canvas.delete("all")
+    canvas.create_image(0, 0, image=photo_image, anchor="nw")
+
+    if not dots:
+        return
+
+    update_limits(dots)
+
+    colors = ["#FF0000", "#00FF00"]  # Red for Outer, Green for Inner
+    for i, tri in enumerate(triangles):
+        color = colors[i] if i < len(colors) else "#FFFFFF"
+        draw_triangle(tri, plot_func, color=color)
+
+    for i, dot in enumerate(dots):
+        draw_dot(dot, plot_func, color="#FFFFFF")
+
+
+# Internal functions below
+
+def draw_dot(dot, plot_func, color="#FFFFFF"):
+    cx, cy = convert_to_canvas_navigation(dot.x, dot.y, camera_config)
+    padding_x = 5
+    padding_y = -5
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            plot_func(cx + dx, cy + dy, color=color)
+
+    label_text = f"{dot.index + 1}: ({dot.x}, {dot.y})"
+    plot_func(cx + padding_x, cy + padding_y, color=color, text=label_text)
 
 
 def draw_line(d1: Dot, d2: Dot, plot_func, color="#FFFFFF"):
@@ -32,13 +67,10 @@ def draw_line(d1: Dot, d2: Dot, plot_func, color="#FFFFFF"):
             y0 += sy
 
 
-def draw_triangle(d1: Dot, d2: Dot, d3: Dot, plot_func, color="#FFFFFF"):
-    def plot_with_color(x, y):
-        plot_func(x, y, color=color)
-
-    draw_line(d1, d2, plot_with_color)
-    draw_line(d2, d3, plot_with_color)
-    draw_line(d3, d1, plot_with_color)
+def draw_triangle(tri: Triangle, plot_func, color="#FFFFFF"):
+    plot_func(tri.a, tri.b, color=color)
+    plot_func(tri.b, tri.c, color=color)
+    plot_func(tri.c, tri.a, color=color)
 
 
 def update_limits(parsed_dots):
@@ -66,9 +98,6 @@ def update_limits(parsed_dots):
     camera_config['max_y'] = max_y
 
     print(f"Limits updated: X({min_x}, {max_x}), Y({min_y}, {max_y})")
-
-
-# Internal functions below
 
 
 def convert_to_canvas_navigation(x0, y0, config):
@@ -100,9 +129,10 @@ def convert_to_canvas_navigation(x0, y0, config):
 
 
 class Dot:
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float, index: int):
         self.x = x
         self.y = y
+        self.index = index
 
 
 class Triangle:
