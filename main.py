@@ -1,6 +1,49 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from utils import CANVAS_WIDTH, CANVAS_HEIGHT, draw_triangle, draw_line, Dot
+
+parsed_dots = []
+
+
+def handle_parse():
+    # Clear the table for new input
+    for item in tree.get_children():
+        tree.delete(item)
+
+    raw_text = text_entry.get("1.0", "end-1c")
+    lines = raw_text.strip().split('\n')
+
+    try:
+        for i, line in enumerate(lines):
+            if not line.strip():
+                continue  # Skip empty lines
+
+            # Split by comma and strip whitespace to handle "double spaces"
+            parts = [p.strip() for p in line.split(',')]
+
+            if len(parts) != 2:
+                raise ValueError(f"Line {i + 1} must have exactly two coordinates: 'x, y'")
+
+            # Convert to float (to allow decimal input) then to Dot objects
+            x = float(parts[0])
+            y = float(parts[1])
+
+            dot = Dot(x, y)
+            parsed_dots.append(dot)
+
+            # Display in table: (Number, X, Y)
+            # Since duplicated dots are valid, we just append them all.
+            tree.insert("", "end", values=(i + 1, dot.x, dot.y))
+
+        info_field.delete(0, tk.END)
+        info_field.insert(0, f"Successfully parsed {len(parsed_dots)} dots.")
+        return
+
+    except ValueError as e:
+        # Requirement: Display message for incorrect data
+        messagebox.showerror("Input Error", f"Invalid format on line {i + 1}.\nUse: x, y\nError: {e}")
+        return
+
 
 LEFT_PANEL_WIDTH = 300
 MIDDLE_PANEL_WIDTH = 400
@@ -18,7 +61,7 @@ left_frame.pack_propagate(False)
 tk.Label(left_frame, text="Raw Dot Input:").pack(anchor="w")
 text_entry = tk.Text(left_frame, wrap="none")
 text_entry.pack(fill="both", expand=True, pady=(0, 10))
-parse_button = tk.Button(left_frame, text="Parse Dots", cursor="hand2", background="#2bff00")
+parse_button = tk.Button(left_frame, text="Parse Dots", cursor="hand2", background="#2bff00", command=handle_parse)
 parse_button.pack(fill="x", side="bottom")
 
 # Table (Number, X, Y)
@@ -28,38 +71,33 @@ middle_frame.pack_propagate(False)
 tk.Label(middle_frame, text="Parsed Dots:").pack(anchor="w")
 columns = ("number", "x", "y")
 tree = ttk.Treeview(middle_frame, columns=columns, show="headings")
-
 tree.heading("number", text="№")
 tree.heading("x", text="Coordinate X")
 tree.heading("y", text="Coordinate Y")
-
-# Adjust column widths
 tree.column("number", width=50, anchor="center")
 tree.column("x", width=100, anchor="center")
 tree.column("y", width=100, anchor="center")
-
 tree.pack(fill="both", expand=True)
 
 # 3. RIGHT COLUMN: Random Text + Canvas
 right_frame = tk.Frame(main_container, padx=10, pady=10)
 right_frame.pack(side="left", fill="both", expand=True)
-
 # Single-line field for random text (Result output )
 tk.Label(right_frame, text="Status/Result:").pack(anchor="w")
 info_field = tk.Entry(right_frame)
 info_field.insert(0, "Random text or result output here...")
 info_field.pack(fill="x", pady=(0, 10))
 
-# Your existing Canvas setup
 canvas = tk.Canvas(right_frame, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, background="#000000")
 canvas.pack(fill="both", expand=True)
-
 img = tk.PhotoImage(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
 canvas.create_image((0, 0), image=img, anchor="nw")
+
 
 def put_pixel(x, y, color="#FFFFFF"):
     if 0 <= x < CANVAS_WIDTH and 0 <= y < CANVAS_HEIGHT:
         img.put(color, (x, y))
+
 
 draw_line(Dot(50, 50), Dot(100, 150), put_pixel)
 
