@@ -103,3 +103,10 @@ class Dot:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+
+class Triangle:
+    def __init__(self, a: Dot, b: Dot, c: Dot):
+        self.a = a
+        self.b = b
+        self.c = c
