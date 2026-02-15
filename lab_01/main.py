@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 from itertools import combinations
 
 from lab_01.utils import show_content
-from utils import CANVAS_WIDTH, CANVAS_HEIGHT, draw_triangle, Dot, Triangle, update_limits
+from utils import CANVAS_WIDTH, CANVAS_HEIGHT, Dot, Triangle
 
 parsed_dots = []
 triangles = []
@@ -16,6 +16,8 @@ def handle_parse():
 
     raw_text = text_entry.get("1.0", "end-1c")
     lines = raw_text.strip().split('\n')
+    global parsed_dots
+    parsed_dots = []
 
     try:
         for i, line in enumerate(lines):
@@ -149,7 +151,7 @@ right_frame.pack(side="left", fill="both", expand=True)
 # Single-line field for random text (Result output )
 tk.Label(right_frame, text="Status/Result:").pack(anchor="w")
 info_field = tk.Entry(right_frame)
-info_field.insert(0, "Random text or result output here...")
+info_field.insert(0, "Enter your dots first")
 info_field.pack(fill="x", pady=(0, 10))
 
 canvas = tk.Canvas(right_frame, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, background="#000000")

@@ -68,9 +68,9 @@ def draw_line(d1: Dot, d2: Dot, plot_func, color="#FFFFFF"):
 
 
 def draw_triangle(tri: Triangle, plot_func, color="#FFFFFF"):
-    plot_func(tri.a, tri.b, color=color)
-    plot_func(tri.b, tri.c, color=color)
-    plot_func(tri.c, tri.a, color=color)
+    draw_line(tri.a, tri.b, plot_func, color=color)
+    draw_line(tri.b, tri.c, plot_func, color=color)
+    draw_line(tri.c, tri.a, plot_func, color=color)
 
 
 def update_limits(parsed_dots):
