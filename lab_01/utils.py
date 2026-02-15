@@ -110,3 +110,21 @@ class Triangle:
         self.a = a
         self.b = b
         self.c = c
+        self.area = self.calculate_area()
+
+    def calculate_area(self):
+        return 0.5 * abs(self.a.x * (self.b.y - self.c.y) +
+                         self.b.x * (self.c.y - self.a.y) +
+                         self.c.x * (self.a.y - self.b.y))
+
+    def is_dot_inside(self, p: Dot):
+        # A point is strictly inside if it's not a vertex and satisfies area logic
+        if p in (self.a, self.b, self.c):
+            return False
+
+        area1 = Triangle(p, self.a, self.b).area
+        area2 = Triangle(p, self.b, self.c).area
+        area3 = Triangle(p, self.c, self.a).area
+
+        # Using a small epsilon for float comparison
+        return abs(self.area - (area1 + area2 + area3)) < 1e-9
