@@ -102,7 +102,10 @@ def solve_task():
 
     global triangles
     triangles = [best_outer, best_inner]
-    result_text = f"Outer Area: {min_outer_area:.2f}, Inner Area: {min_inner_area:.2f}"
+    o_idx = (best_outer.a.index + 1, best_outer.b.index + 1, best_outer.c.index + 1)
+    i_idx = (best_inner.a.index + 1, best_inner.b.index + 1, best_inner.c.index + 1)
+    result_text = (f"Outer (Pts {o_idx[0]},{o_idx[1]},{o_idx[2]}): Area {min_outer_area:.2f} | "
+                   f"Inner (Pts {i_idx[0]},{i_idx[1]},{i_idx[2]}): Area {min_inner_area:.2f}")
     info_field.delete(0, tk.END)
     info_field.insert(0, result_text)
 
