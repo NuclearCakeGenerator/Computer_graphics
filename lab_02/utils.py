@@ -18,8 +18,6 @@ def show_content(dots, triangles, plot_func, photo_image, canvas):
     if not dots:
         return
 
-    update_limits(dots)
-
     colors = ["#FF0000", "#00FF00"]  # Red for Outer, Green for Inner
     for i, tri in enumerate(triangles):
         color = colors[i] if i < len(colors) else "#FFFFFF"
