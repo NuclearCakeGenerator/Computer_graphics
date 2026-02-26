@@ -1,6 +1,5 @@
 CANVAS_WIDTH = 900
 CANVAS_HEIGHT = 900
-CANVAS_INTERNAL_PADDING = 60
 
 camera_config = {
     'max_x': 450,
@@ -75,28 +74,10 @@ def convert_to_canvas_navigation(x0, y0, config):
     x1 = x0 - config['min_x']
     y1 = y0 - config['min_y']
 
-    canvas_drawable_area = (CANVAS_WIDTH - 2 * CANVAS_INTERNAL_PADDING,
-                            CANVAS_HEIGHT - 2 * CANVAS_INTERNAL_PADDING)
-    area_width = config['max_x'] - config['min_x']
-    area_height = config['max_y'] - config['min_y']
+    x2 = round(x1)
+    y2 = round(CANVAS_HEIGHT - y1)
 
-    if area_width == 0:
-        scale = canvas_drawable_area[1] / area_height
-    elif area_height == 0:
-        scale = canvas_drawable_area[0] / area_width
-    else:
-        scale = min(canvas_drawable_area[1] / area_height, canvas_drawable_area[0] / area_width)
-
-    canvas_center = (CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2)
-    area_center = ((config['max_x'] - config['min_x']) / 2, (config['max_y'] - config['min_y']) / 2)
-
-    x2 = scale * (x1 - area_center[0]) + canvas_center[0]
-    y2 = scale * (y1 - area_center[1]) + canvas_center[1]
-
-    x3 = round(x2)
-    y3 = round(CANVAS_HEIGHT - y2)
-
-    return x3, y3
+    return x2, y2
 
 
 class Dot:
