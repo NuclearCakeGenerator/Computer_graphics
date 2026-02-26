@@ -9,6 +9,70 @@ camera_config = {
 }
 
 
+class Dot:
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+
+class Triangle:
+    def __init__(self, a: Dot, b: Dot, c: Dot):
+        self.a = a
+        self.b = b
+        self.c = c
+        self.area = self.calculate_area()
+
+    def calculate_area(self):
+        return 0.5 * abs(self.a.x * (self.b.y - self.c.y) +
+                         self.b.x * (self.c.y - self.a.y) +
+                         self.c.x * (self.a.y - self.b.y))
+
+    def is_dot_inside(self, p: Dot):
+        # A point is strictly inside if it's not a vertex and satisfies area logic
+        if p in (self.a, self.b, self.c):
+            return False
+
+        area1 = Triangle(p, self.a, self.b).area
+        area2 = Triangle(p, self.b, self.c).area
+        area3 = Triangle(p, self.c, self.a).area
+
+        # Using a small epsilon for float comparison
+        return abs(self.area - (area1 + area2 + area3)) < 1e-9
+
+
+class Segment:
+    def __init__(self, first_dot: Dot, second_dot: Dot):
+        self.first_dot = first_dot
+        self.second_dot = second_dot
+
+
+class Content:
+    def __init__(self, segments: list[Segment]):
+        self.segments = segments
+        self.dots = set()
+        for segment in segments:
+            self.dots.add(segment.first_dot)
+            self.dots.add(segment.second_dot)
+
+
+INITIAL_CONTENT = Content([
+    Segment(Dot(50, -100), Dot(100, 0)),
+    Segment(Dot(100, 0), Dot(0, 100)),
+    Segment(Dot(0, 100), Dot(-100, 0)),
+    Segment(Dot(-100, 0), Dot(-50, -100)),
+    Segment(Dot(-50, -100), Dot(50, -100)),
+
+    Segment(Dot(20, 50), Dot(130, 50)),
+    Segment(Dot(130, 50), Dot(130, 150)),
+    Segment(Dot(130, 150), Dot(20, 150)),
+    Segment(Dot(20, 150), Dot(20, 50)),
+
+    Segment(Dot(-50, 50), Dot(-150, 50)),
+    Segment(Dot(-150, 50), Dot(-100, -150)),
+    Segment(Dot(-100, -150), Dot(-50, 50)),
+])
+
+
 def show_content(content: Content, plot_func, photo_image, canvas):
     photo_image.put("#000000", to=(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT))
     canvas.delete("all")
@@ -31,7 +95,7 @@ def draw_dot(dot, plot_func, color="#FFFFFF"):
         for dy in range(-1, 2):
             plot_func(cx + dx, cy + dy, color=color)
 
-    label_text = f"{dot.index + 1}: ({dot.x}, {dot.y})"
+    label_text = f"({dot.x}, {dot.y})"
     plot_func(cx + padding_x, cy + padding_y, color=color, text=label_text)
 
 
@@ -73,50 +137,3 @@ def convert_to_canvas_navigation(x0, y0, config):
     y2 = round(CANVAS_HEIGHT - y1)
 
     return x2, y2
-
-
-class Dot:
-    def __init__(self, x: float, y: float, index: int):
-        self.x = x
-        self.y = y
-        self.index = index
-
-
-class Triangle:
-    def __init__(self, a: Dot, b: Dot, c: Dot):
-        self.a = a
-        self.b = b
-        self.c = c
-        self.area = self.calculate_area()
-
-    def calculate_area(self):
-        return 0.5 * abs(self.a.x * (self.b.y - self.c.y) +
-                         self.b.x * (self.c.y - self.a.y) +
-                         self.c.x * (self.a.y - self.b.y))
-
-    def is_dot_inside(self, p: Dot):
-        # A point is strictly inside if it's not a vertex and satisfies area logic
-        if p in (self.a, self.b, self.c):
-            return False
-
-        area1 = Triangle(p, self.a, self.b).area
-        area2 = Triangle(p, self.b, self.c).area
-        area3 = Triangle(p, self.c, self.a).area
-
-        # Using a small epsilon for float comparison
-        return abs(self.area - (area1 + area2 + area3)) < 1e-9
-
-
-class Segment:
-    def __init__(self, first_dot: Dot, second_dot: Dot):
-        self.first_dot = first_dot
-        self.second_dot = second_dot
-
-
-class Content:
-    def __init__(self, segments: list[Segment]):
-        self.segments = segments
-        self.dots = set()
-        for segment in segments:
-            self.dots.add(segment.first_dot)
-            self.dots.add(segment.second_dot)
