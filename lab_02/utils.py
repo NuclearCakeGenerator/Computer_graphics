@@ -47,12 +47,13 @@ class Segment:
 
 
 class Content:
-    def __init__(self, segments: list[Segment]):
-        self.segments = segments
-        self.dots = set()
+    def __init__(self, segments: list[Segment], target: Dot | None = Dot(0, 0)):
+        self.segments: list[Segment] = segments
+        self.common_dots: set[Dot] = set()
         for segment in segments:
-            self.dots.add(segment.first_dot)
-            self.dots.add(segment.second_dot)
+            self.common_dots.add(segment.first_dot)
+            self.common_dots.add(segment.second_dot)
+        self.transformation_center: Dot | None = target
 
 
 INITIAL_CONTENT = Content([
@@ -81,8 +82,11 @@ def show_content(content: Content, plot_func, photo_image, canvas):
     for segment in content.segments:
         draw_segment(segment, plot_func, color="#FFFFFF")
 
-    for dot in content.dots:
+    for dot in content.common_dots:
         draw_dot(dot, plot_func, color="#FFFFFF")
+
+    if content.transformation_center is not None:
+        draw_dot(content.transformation_center, plot_func, color="#FF0000")
 
 
 # Internal functions below
