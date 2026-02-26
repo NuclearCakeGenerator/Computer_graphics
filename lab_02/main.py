@@ -1,15 +1,15 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from itertools import combinations
+import copy
 
 from utils import show_content
-from utils import CANVAS_WIDTH, CANVAS_HEIGHT, Dot, Triangle, Content, INITIAL_CONTENT
-
-parsed_dots = []
-triangles = []
+from utils import CANVAS_WIDTH, CANVAS_HEIGHT, Content, INITIAL_CONTENT
 
 LEFT_PANEL_WIDTH = 300
-MIDDLE_PANEL_WIDTH = 400
+
+current_content: Content | None = copy.deepcopy(INITIAL_CONTENT)
+last_content: Content | None = None
 
 root = tk.Tk()
 root.title("Computer Graphics Lab 1")
@@ -26,23 +26,6 @@ text_entry = tk.Text(left_frame, wrap="none")
 text_entry.pack(fill="both", expand=True, pady=(0, 10))
 parse_button = tk.Button(left_frame, text="Parse Dots", cursor="hand2", background="#2bff00")
 parse_button.pack(fill="x", side="bottom")
-
-# Table (Number, X, Y)
-middle_frame = tk.Frame(main_container, width=MIDDLE_PANEL_WIDTH, padx=10, pady=10)
-middle_frame.pack(side="left", fill="y")
-middle_frame.pack_propagate(False)
-tk.Label(middle_frame, text="Parsed Dots:").pack(anchor="w")
-columns = ("number", "x", "y")
-tree = ttk.Treeview(middle_frame, columns=columns, show="headings")
-tree.heading("number", text="№")
-tree.heading("x", text="Coordinate X")
-tree.heading("y", text="Coordinate Y")
-tree.column("number", width=50, anchor="center")
-tree.column("x", width=100, anchor="center")
-tree.column("y", width=100, anchor="center")
-tree.pack(fill="both", expand=True)
-solve_button = tk.Button(middle_frame, text="Solve", cursor="hand2", background="#2bff00")
-solve_button.pack(fill="x", side="bottom")
 
 # 3. RIGHT COLUMN: Random Text + Canvas
 right_frame = tk.Frame(main_container, padx=10, pady=10)
@@ -73,6 +56,6 @@ def put_pixel(x, y, color="#FFFFFF", text: str = ""):
             )
 
 
-show_content(INITIAL_CONTENT, put_pixel, img, canvas)
+show_content(current_content, put_pixel, img, canvas)
 
 root.mainloop()
