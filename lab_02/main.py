@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from itertools import combinations
 
-from lab_01.utils import show_content
+from utils import show_content
 from utils import CANVAS_WIDTH, CANVAS_HEIGHT, Dot, Triangle
 
 parsed_dots = []
