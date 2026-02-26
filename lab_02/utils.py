@@ -9,20 +9,15 @@ camera_config = {
 }
 
 
-def show_content(dots, triangles, plot_func, photo_image, canvas):
+def show_content(content: Content, plot_func, photo_image, canvas):
     photo_image.put("#000000", to=(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT))
     canvas.delete("all")
     canvas.create_image(0, 0, image=photo_image, anchor="nw")
 
-    if not dots:
-        return
+    for segment in content.segments:
+        draw_segment(segment, plot_func, color="#FFFFFF")
 
-    colors = ["#FF0000", "#00FF00"]  # Red for Outer, Green for Inner
-    for i, tri in enumerate(triangles):
-        color = colors[i] if i < len(colors) else "#FFFFFF"
-        draw_triangle(tri, plot_func, color=color)
-
-    for i, dot in enumerate(dots):
+    for dot in content.dots:
         draw_dot(dot, plot_func, color="#FFFFFF")
 
 
@@ -40,9 +35,9 @@ def draw_dot(dot, plot_func, color="#FFFFFF"):
     plot_func(cx + padding_x, cy + padding_y, color=color, text=label_text)
 
 
-def draw_segment(d1: Dot, d2: Dot, plot_func, color="#FFFFFF"):
-    x0, y0 = convert_to_canvas_navigation(d1.x, d1.y, camera_config)
-    x1, y1 = convert_to_canvas_navigation(d2.x, d2.y, camera_config)
+def draw_segment(segment: Segment, plot_func, color="#FFFFFF"):
+    x0, y0 = convert_to_canvas_navigation(segment.first_dot.x, segment.first_dot.y, camera_config)
+    x1, y1 = convert_to_canvas_navigation(segment.second_dot.x, segment.second_dot.y, camera_config)
 
     dx = abs(x1 - x0)
     dy = abs(y1 - y0)
@@ -65,9 +60,9 @@ def draw_segment(d1: Dot, d2: Dot, plot_func, color="#FFFFFF"):
 
 
 def draw_triangle(tri: Triangle, plot_func, color="#FFFFFF"):
-    draw_segment(tri.a, tri.b, plot_func, color=color)
-    draw_segment(tri.b, tri.c, plot_func, color=color)
-    draw_segment(tri.c, tri.a, plot_func, color=color)
+    draw_segment(Segment(tri.a, tri.b), plot_func, color=color)
+    draw_segment(Segment(tri.b, tri.c), plot_func, color=color)
+    draw_segment(Segment(tri.c, tri.a), plot_func, color=color)
 
 
 def convert_to_canvas_navigation(x0, y0, config):
@@ -110,3 +105,18 @@ class Triangle:
 
         # Using a small epsilon for float comparison
         return abs(self.area - (area1 + area2 + area3)) < 1e-9
+
+
+class Segment:
+    def __init__(self, first_dot: Dot, second_dot: Dot):
+        self.first_dot = first_dot
+        self.second_dot = second_dot
+
+
+class Content:
+    def __init__(self, segments: list[Segment]):
+        self.segments = segments
+        self.dots = set()
+        for segment in segments:
+            self.dots.add(segment.first_dot)
+            self.dots.add(segment.second_dot)

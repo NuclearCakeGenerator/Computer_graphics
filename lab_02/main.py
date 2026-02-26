@@ -84,8 +84,8 @@ def solve_task():
 
             # Check if t_inner is strictly inside t_outer
             # All vertices of inner must be inside outer
-            if (t_outer.is_dot_inside(t_inner.a) and
-                    t_outer.is_dot_inside(t_inner.b) and
+            if (t_outer.is_dot_inside(t_inner.first_dot) and
+                    t_outer.is_dot_inside(t_inner.second_dot) and
                     t_outer.is_dot_inside(t_inner.c)):
 
                 # Check priority criteria
