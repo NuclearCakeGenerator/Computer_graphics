@@ -49,13 +49,14 @@ class Segment:
 class Content:
     def __init__(self, segments: list[Segment], target: Dot | None = Dot(0, 0)):
         self.segments: list[Segment] = segments
-        self.common_dots: set[Dot] = set()
+        self.dots: set[Dot] = set()
         self.update_dots()
 
     def update_dots(self):
+        self.dots.clear()
         for segment in self.segments:
-            self.common_dots.add(segment.first_dot)
-            self.common_dots.add(segment.second_dot)
+            self.dots.add(segment.first_dot)
+            self.dots.add(segment.second_dot)
 
 
 INITIAL_CONTENT = Content([
@@ -77,6 +78,7 @@ INITIAL_CONTENT = Content([
 
 
 def show_content(content: Content, center: Dot, plot_func, photo_image, canvas):
+    content.update_dots()
     photo_image.put("#000000", to=(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT))
     canvas.delete("all")
     canvas.create_image(0, 0, image=photo_image, anchor="nw")
@@ -84,7 +86,7 @@ def show_content(content: Content, center: Dot, plot_func, photo_image, canvas):
     for segment in content.segments:
         draw_segment(segment, plot_func, color="#FFFFFF")
 
-    for dot in content.common_dots:
+    for dot in content.dots:
         draw_dot(dot, plot_func, color="#FFFFFF")
 
     if center is not None:

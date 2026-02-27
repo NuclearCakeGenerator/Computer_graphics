@@ -1,7 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
-from itertools import combinations
+from tkinter import messagebox
 import copy
+import math
 
 from utils import show_content
 from utils import CANVAS_WIDTH, CANVAS_HEIGHT, Content, INITIAL_CONTENT, Dot
@@ -13,7 +13,7 @@ last_content: Content | None = None
 transformation_center: Dot | None = None
 
 
-def my_show_content():
+def show_content_wrapper():
     show_content(current_content, transformation_center, put_pixel, img, canvas)
 
 
@@ -40,8 +40,8 @@ def move_picture():
             segment.second_dot.x += dx
             segment.first_dot.y += dy
             segment.second_dot.y += dy
-        current_content.update_dots()
-        my_show_content()
+        
+        show_content_wrapper()
 
 
     except ValueError:
@@ -85,8 +85,8 @@ def scale_picture():
                                       segment.first_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
         segment.second_dot.y = (
                                        segment.second_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
-        current_content.update_dots()
-        my_show_content()
+        
+        show_content_wrapper()
 
 
 def update_center():
@@ -95,9 +95,52 @@ def update_center():
         cy = float(entry_cy.get())
         global transformation_center
         transformation_center = Dot(cx, cy)
-        my_show_content()
+        
+        show_content_wrapper()
     except ValueError:
         pass
+
+
+def handle_rotate():
+    def rotate_dot(p: Dot) -> Dot:
+        pivot = transformation_center
+        theta = math.radians(degrees)
+
+        cos_theta = math.cos(theta)
+        sin_theta = math.sin(theta)
+
+        temp_x = p.x - pivot.x
+        temp_y = p.y - pivot.y
+
+        new_x = temp_x * cos_theta - temp_y * sin_theta
+        new_y = temp_x * sin_theta + temp_y * cos_theta
+
+        return Dot(new_x + pivot.x, new_y + pivot.y)
+
+    try:
+        cx = float(entry_cx.get())
+        cy = float(entry_cy.get())
+    except ValueError:
+        messagebox.showerror(
+            "Input Error",
+            "Please enter valid numeric values for X and Y for center of transformation."
+        )
+        return
+    global transformation_center
+    transformation_center = Dot(cx, cy)
+
+    try:
+        degrees = float(entry_rotate.get())
+    except ValueError:
+        messagebox.showerror("Input Error", "Invalid rotation value")
+
+    global last_content
+    last_content = copy.deepcopy(current_content)
+    for segment in current_content.segments:
+        segment.first_dot = rotate_dot(segment.first_dot)
+        segment.second_dot = rotate_dot(segment.second_dot)
+        
+        show_content_wrapper()
 
 
 root = tk.Tk()
@@ -172,7 +215,7 @@ entry_scale.grid(row=1, column=1, padx=5)
 button_row = tk.Frame(relative_transformation_frame)
 button_row.pack(fill="x")
 
-btn_rotate = tk.Button(button_row, text="rotate", width=10)
+btn_rotate = tk.Button(button_row, text="rotate", width=10, command=handle_rotate)
 btn_rotate.pack(side="left", expand=True, padx=2)
 
 btn_scale = tk.Button(button_row, text="scale", width=10, command=scale_picture)
@@ -201,6 +244,6 @@ def put_pixel(x, y, color="#FFFFFF", text: str = ""):
             )
 
 
-my_show_content()
+show_content_wrapper()
 
 root.mainloop()
