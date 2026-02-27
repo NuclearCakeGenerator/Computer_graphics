@@ -51,7 +51,6 @@ class Content:
         self.segments: list[Segment] = segments
         self.common_dots: set[Dot] = set()
         self.update_dots()
-        self.transformation_center: Dot | None = target
 
     def update_dots(self):
         for segment in self.segments:
@@ -77,7 +76,7 @@ INITIAL_CONTENT = Content([
 ])
 
 
-def show_content(content: Content, plot_func, photo_image, canvas):
+def show_content(content: Content, center: Dot, plot_func, photo_image, canvas):
     photo_image.put("#000000", to=(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT))
     canvas.delete("all")
     canvas.create_image(0, 0, image=photo_image, anchor="nw")
@@ -88,8 +87,8 @@ def show_content(content: Content, plot_func, photo_image, canvas):
     for dot in content.common_dots:
         draw_dot(dot, plot_func, color="#FFFFFF")
 
-    if content.transformation_center is not None:
-        draw_dot(content.transformation_center, plot_func, color="#FF0000")
+    if center is not None:
+        draw_dot(center, plot_func, color="#FF0000")
 
 
 # Internal functions below
@@ -102,7 +101,7 @@ def draw_dot(dot, plot_func, color="#FFFFFF"):
         for dy in range(-1, 2):
             plot_func(cx + dx, cy + dy, color=color)
 
-    label_text = f"({dot.x}, {dot.y})"
+    label_text = f"({round(dot.x, 2)}, {round(dot.y, 2)})"
     plot_func(cx + padding_x, cy + padding_y, color=color, text=label_text)
 
 
@@ -140,7 +139,7 @@ def convert_to_canvas_navigation(x0, y0, config):
     x1 = x0 - config['min_x']
     y1 = y0 - config['min_y']
 
-    x2 = round(x1)
-    y2 = round(CANVAS_HEIGHT - y1)
+    x2 = int(round(x1))
+    y2 = int(round(CANVAS_HEIGHT - y1))
 
     return x2, y2

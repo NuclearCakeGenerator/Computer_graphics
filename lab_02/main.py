@@ -4,27 +4,44 @@ from itertools import combinations
 import copy
 
 from utils import show_content
-from utils import CANVAS_WIDTH, CANVAS_HEIGHT, Content, INITIAL_CONTENT
+from utils import CANVAS_WIDTH, CANVAS_HEIGHT, Content, INITIAL_CONTENT, Dot
 
 LEFT_PANEL_WIDTH = 300
 
 current_content: Content | None = copy.deepcopy(INITIAL_CONTENT)
 last_content: Content | None = None
+transformation_center: Dot | None = None
+
+
+def my_show_content():
+    show_content(current_content, transformation_center, put_pixel, img, canvas)
+
+
+transform_job = None
+
+
+def handle_center_update(*args):
+    global transform_job
+    if transform_job:
+        main_container.after_cancel(transform_job)
+
+    transform_job = main_container.after(300, update_center)
 
 
 def move_picture():
     try:
-        dx = int(float(entry_dx.get()))
-        dy = int(float(entry_dy.get()))
+        dx = float(entry_dx.get())
+        dy = float(entry_dy.get())
 
-        last_content: Content = copy.deepcopy(current_content)
+        global last_content
+        last_content = copy.deepcopy(current_content)
         for segment in current_content.segments:
             segment.first_dot.x += dx
             segment.second_dot.x += dx
             segment.first_dot.y += dy
             segment.second_dot.y += dy
         current_content.update_dots()
-        show_content(current_content, put_pixel, img, canvas)
+        my_show_content()
 
 
     except ValueError:
@@ -34,8 +51,61 @@ def move_picture():
         )
 
 
+def scale_picture():
+    global last_content
+    global current_content
+    try:
+        cx = float(entry_cx.get())
+        cy = float(entry_cy.get())
+    except ValueError:
+        messagebox.showerror(
+            "Input Error",
+            "Please enter valid numeric values for X and Y for center of transformation."
+        )
+        return
+    current_content.transformation_center = Dot(cx, cy)
+    # show_content(current_content, put_pixel, img, canvas)
+
+    try:
+        scale_factor = float(entry_scale.get())
+    except ValueError:
+        messagebox.showerror(
+            "Input Error",
+            "Please enter valid float value for scale."
+        )
+        return
+
+    last_content = copy.deepcopy(current_content)
+    for segment in current_content.segments:
+        segment.first_dot.x = (
+                                      segment.first_dot.x - current_content.transformation_center.x) * scale_factor + transformation_center.x
+        segment.second_dot.x = (
+                                       segment.second_dot.x - current_content.transformation_center.x) * scale_factor + transformation_center.x
+        segment.first_dot.y = (
+                                      segment.first_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
+        segment.second_dot.y = (
+                                       segment.second_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
+        current_content.update_dots()
+        my_show_content()
+
+
+def update_center():
+    try:
+        cx = float(entry_cx.get())
+        cy = float(entry_cy.get())
+        global transformation_center
+        transformation_center = Dot(cx, cy)
+        my_show_content()
+    except ValueError:
+        pass
+
+
 root = tk.Tk()
 root.title("Computer Graphics Lab 2")
+center_x = tk.StringVar()
+center_y = tk.StringVar()
+center_x.trace_add("write", handle_center_update)
+center_y.trace_add("write", handle_center_update)
 
 main_container = tk.Frame(root)
 main_container.pack(fill="both", expand=True)
@@ -81,9 +151,9 @@ center_inputs.pack(pady=5)
 tk.Label(center_inputs, text="X").grid(row=0, column=0)
 tk.Label(center_inputs, text="Y").grid(row=0, column=1)
 
-entry_cx = tk.Entry(center_inputs, width=8)
+entry_cx = tk.Entry(center_inputs, width=8, textvariable=center_x)
 entry_cx.grid(row=1, column=0, padx=5)
-entry_cy = tk.Entry(center_inputs, width=8)
+entry_cy = tk.Entry(center_inputs, width=8, textvariable=center_y)
 entry_cy.grid(row=1, column=1, padx=5)
 
 # Rotate and Scale Inputs Row
@@ -105,7 +175,7 @@ button_row.pack(fill="x")
 btn_rotate = tk.Button(button_row, text="rotate", width=10)
 btn_rotate.pack(side="left", expand=True, padx=2)
 
-btn_scale = tk.Button(button_row, text="scale", width=10)
+btn_scale = tk.Button(button_row, text="scale", width=10, command=scale_picture)
 btn_scale.pack(side="left", expand=True, padx=2)
 
 # Canvas
@@ -131,6 +201,6 @@ def put_pixel(x, y, color="#FFFFFF", text: str = ""):
             )
 
 
-show_content(current_content, put_pixel, img, canvas)
+my_show_content()
 
 root.mainloop()
