@@ -50,10 +50,13 @@ class Content:
     def __init__(self, segments: list[Segment], target: Dot | None = Dot(0, 0)):
         self.segments: list[Segment] = segments
         self.common_dots: set[Dot] = set()
-        for segment in segments:
+        self.update_dots()
+        self.transformation_center: Dot | None = target
+
+    def update_dots(self):
+        for segment in self.segments:
             self.common_dots.add(segment.first_dot)
             self.common_dots.add(segment.second_dot)
-        self.transformation_center: Dot | None = target
 
 
 INITIAL_CONTENT = Content([
