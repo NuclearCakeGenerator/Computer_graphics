@@ -148,6 +148,13 @@ def handle_rotate():
         show_content_wrapper()
 
 
+def handle_undo():
+    global current_content, last_content
+    current_content = copy.deepcopy(last_content)
+    last_content = None
+    show_content_wrapper()
+
+
 root = tk.Tk()
 root.title("Computer Graphics Lab 2")
 center_x = tk.StringVar()
@@ -233,7 +240,8 @@ btn_undo = tk.Button(
     text="Undo",
     width=20,
     height=2,
-    bg="#00ff00"
+    bg="#00ff00",
+    command=handle_undo
 )
 btn_undo.pack(side="bottom", pady=10)
 
