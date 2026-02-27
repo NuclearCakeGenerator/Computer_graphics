@@ -14,6 +14,11 @@ transformation_center: Dot | None = None
 
 
 def show_content_wrapper():
+    if last_content is not None:
+        btn_undo.config(state="normal", bg="#00ff00")
+    else:
+        btn_undo.config(state="disabled", bg="#f0f0f0")
+
     show_content(current_content, transformation_center, put_pixel, img, canvas)
 
 
@@ -40,7 +45,7 @@ def move_picture():
             segment.second_dot.x += dx
             segment.first_dot.y += dy
             segment.second_dot.y += dy
-        
+
         show_content_wrapper()
 
 
@@ -85,7 +90,7 @@ def scale_picture():
                                       segment.first_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
         segment.second_dot.y = (
                                        segment.second_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
-        
+
         show_content_wrapper()
 
 
@@ -95,7 +100,7 @@ def update_center():
         cy = float(entry_cy.get())
         global transformation_center
         transformation_center = Dot(cx, cy)
-        
+
         show_content_wrapper()
     except ValueError:
         pass
@@ -139,7 +144,7 @@ def handle_rotate():
     for segment in current_content.segments:
         segment.first_dot = rotate_dot(segment.first_dot)
         segment.second_dot = rotate_dot(segment.second_dot)
-        
+
         show_content_wrapper()
 
 
@@ -220,6 +225,17 @@ btn_rotate.pack(side="left", expand=True, padx=2)
 
 btn_scale = tk.Button(button_row, text="scale", width=10, command=scale_picture)
 btn_scale.pack(side="left", expand=True, padx=2)
+
+tk.Frame(left_frame, height=2, bd=1, relief="sunken").pack(fill="x", pady=10)
+
+btn_undo = tk.Button(
+    left_frame,
+    text="Undo",
+    width=20,
+    height=2,
+    bg="#00ff00"
+)
+btn_undo.pack(side="bottom", pady=10)
 
 # Canvas
 right_frame = tk.Frame(main_container, padx=10, pady=10)
