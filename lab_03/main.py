@@ -41,6 +41,7 @@ class PseudoPixelCanvas:
         self.offset_y = 0
         self.bg_hex = "#000000"
         self.bg_rgb = (0, 0, 0)
+        self.grid_line_color = "#494949"
 
         self.update_grid(self.grid_w, self.grid_h)
 
@@ -50,9 +51,7 @@ class PseudoPixelCanvas:
 
         self.cell_size = max(
             1,
-            int(
-                min(self.width_px / self.grid_w, self.height_px / self.grid_h)
-            ),
+            int(min(self.width_px / self.grid_w, self.height_px / self.grid_h)),
         )
         drawable_w = self.grid_w * self.cell_size
         drawable_h = self.grid_h * self.cell_size
@@ -73,6 +72,33 @@ class PseudoPixelCanvas:
             fill=self.bg_hex,
             outline="#333333",
         )
+        self._draw_grid_lines()
+
+    def _draw_grid_lines(self):
+        x_start = self.offset_x
+        y_start = self.offset_y
+        x_end = self.offset_x + self.grid_w * self.cell_size
+        y_end = self.offset_y + self.grid_h * self.cell_size
+
+        for col in range(self.grid_w + 1):
+            x = x_start + col * self.cell_size
+            self.canvas.create_line(
+                x,
+                y_start,
+                x,
+                y_end,
+                fill=self.grid_line_color,
+            )
+
+        for row in range(self.grid_h + 1):
+            y = y_start + row * self.cell_size
+            self.canvas.create_line(
+                x_start,
+                y,
+                x_end,
+                y,
+                fill=self.grid_line_color,
+            )
 
     def draw_pixels(self, pixels: list[Pixel], color_hex: str):
         color_rgb = hex_to_rgb(color_hex)
@@ -90,9 +116,7 @@ class PseudoPixelCanvas:
         if not (0 <= px < self.grid_w and 0 <= py < self.grid_h):
             return
 
-        blend = blend_color(
-            self.bg_rgb, color_rgb, max(0.0, min(1.0, intensity))
-        )
+        blend = blend_color(self.bg_rgb, color_rgb, max(0.0, min(1.0, intensity)))
         color_hex = rgb_to_hex(blend)
 
         x0 = self.offset_x + px * self.cell_size
@@ -100,7 +124,12 @@ class PseudoPixelCanvas:
         x1 = x0 + self.cell_size
         y1 = y0 + self.cell_size
         self.canvas.create_rectangle(
-            x0, y0, x1, y1, fill=color_hex, outline=""
+            x0,
+            y0,
+            x1,
+            y1,
+            fill=color_hex,
+            outline=self.grid_line_color,
         )
 
     def _logical_to_grid(self, x: int, y: int) -> tuple[int, int]:
@@ -117,9 +146,7 @@ def hex_to_rgb(color_hex: str) -> tuple[int, int, int]:
     value = color_hex.strip()
     if value.startswith("#"):
         value = value[1:]
-    if len(value) != 6 or any(
-        ch not in "0123456789abcdefABCDEF" for ch in value
-    ):
+    if len(value) != 6 or any(ch not in "0123456789abcdefABCDEF" for ch in value):
         raise ValueError("Color must be in #RRGGBB format")
     return int(value[0:2], 16), int(value[2:4], 16), int(value[4:6], 16)
 
@@ -145,9 +172,7 @@ def line_library(x0: int, y0: int, x1: int, y1: int) -> list[Pixel]:
 
     image = Image.new("L", (width, height), 0)
     draw = ImageDraw.Draw(image)
-    draw.line(
-        (x0 - min_x, y0 - min_y, x1 - min_x, y1 - min_y), fill=255, width=1
-    )
+    draw.line((x0 - min_x, y0 - min_y, x1 - min_x, y1 - min_y), fill=255, width=1)
 
     pixels: list[Pixel] = []
     for y in range(height):
@@ -392,9 +417,7 @@ def stair_count(pixels: list[Pixel], major_x: bool) -> int:
 
     ordered = sorted(
         {(p.x, p.y) for p in pixels},
-        key=lambda point: (
-            (point[0], point[1]) if major_x else (point[1], point[0])
-        ),
+        key=lambda point: ((point[0], point[1]) if major_x else (point[1], point[0])),
     )
     minor_index = 1 if major_x else 0
 
@@ -413,9 +436,7 @@ class App:
         self.root.title("Computer Graphics Lab 3")
         self.root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
 
-        self.algorithms: dict[
-            str, Callable[[int, int, int, int], list[Pixel]]
-        ] = {
+        self.algorithms: dict[str, Callable[[int, int, int, int], list[Pixel]]] = {
             "Library (Pillow)": line_library,
             "DDA": line_dda,
             "Bresenham (float)": line_bres_float,
@@ -438,9 +459,7 @@ class App:
         canvas_frame = tk.Frame(main_frame, padx=10, pady=10)
         canvas_frame.pack(side="left", fill="both", expand=True)
 
-        self.pp_canvas = PseudoPixelCanvas(
-            canvas_frame, CANVAS_SIZE, CANVAS_SIZE
-        )
+        self.pp_canvas = PseudoPixelCanvas(canvas_frame, CANVAS_SIZE, CANVAS_SIZE)
 
         ttk.Label(
             controls, text="Segment coordinates", font=("Arial", 10, "bold")
@@ -466,12 +485,8 @@ class App:
 
         color_row = tk.Frame(controls)
         color_row.pack(fill="x", pady=4)
-        self.entry_color = self._labeled_entry(
-            color_row, "line #RRGGBB", "#00FF66"
-        )
-        self.entry_bg = self._labeled_entry(
-            color_row, "background #RRGGBB", "#000000"
-        )
+        self.entry_color = self._labeled_entry(color_row, "line #RRGGBB", "#00FF66")
+        self.entry_bg = self._labeled_entry(color_row, "background #RRGGBB", "#000000")
 
         grid_row = tk.Frame(controls)
         grid_row.pack(fill="x", pady=4)
@@ -503,9 +518,9 @@ class App:
         ).pack(fill="x", pady=4)
 
         ttk.Separator(controls).pack(fill="x", pady=8)
-        ttk.Label(
-            controls, text="Research setup", font=("Arial", 10, "bold")
-        ).pack(anchor="w")
+        ttk.Label(controls, text="Research setup", font=("Arial", 10, "bold")).pack(
+            anchor="w"
+        )
 
         research_algos = tk.Frame(controls)
         research_algos.pack(fill="x", pady=4)
@@ -515,25 +530,15 @@ class App:
 
         research_params_1 = tk.Frame(controls)
         research_params_1.pack(fill="x", pady=4)
-        self.entry_length = self._labeled_entry(
-            research_params_1, "length", "50"
-        )
-        self.entry_ang_start = self._labeled_entry(
-            research_params_1, "ang start", "0"
-        )
+        self.entry_length = self._labeled_entry(research_params_1, "length", "50")
+        self.entry_ang_start = self._labeled_entry(research_params_1, "ang start", "0")
 
         research_params_2 = tk.Frame(controls)
         research_params_2.pack(fill="x", pady=4)
-        self.entry_ang_end = self._labeled_entry(
-            research_params_2, "ang end", "90"
-        )
-        self.entry_ang_step = self._labeled_entry(
-            research_params_2, "ang step", "2"
-        )
+        self.entry_ang_end = self._labeled_entry(research_params_2, "ang end", "90")
+        self.entry_ang_step = self._labeled_entry(research_params_2, "ang step", "2")
 
-        self.entry_repeats = self._single_entry(
-            controls, "timing repeats", "300"
-        )
+        self.entry_repeats = self._single_entry(controls, "timing repeats", "300")
 
         tk.Button(
             controls,
@@ -562,9 +567,7 @@ class App:
             foreground="#0044AA",
         ).pack(anchor="w", pady=(8, 0))
 
-    def _labeled_entry(
-        self, parent: tk.Widget, label: str, default: str
-    ) -> tk.Entry:
+    def _labeled_entry(self, parent: tk.Widget, label: str, default: str) -> tk.Entry:
         frame = tk.Frame(parent)
         frame.pack(side="left", fill="x", expand=True, padx=2)
         ttk.Label(frame, text=label).pack(anchor="w")
@@ -573,9 +576,7 @@ class App:
         entry.pack(fill="x")
         return entry
 
-    def _single_entry(
-        self, parent: tk.Widget, label: str, default: str
-    ) -> tk.Entry:
+    def _single_entry(self, parent: tk.Widget, label: str, default: str) -> tk.Entry:
         frame = tk.Frame(parent)
         frame.pack(fill="x", pady=4)
         ttk.Label(frame, text=label).pack(anchor="w")
@@ -655,9 +656,7 @@ class App:
 
     def draw_segment(self):
         try:
-            x0, y0, x1, y1, line_color, bg_color, algorithm = (
-                self.parse_segment()
-            )
+            x0, y0, x1, y1, line_color, bg_color, algorithm = self.parse_segment()
         except ValueError as exc:
             messagebox.showerror("Input Error", str(exc))
             return
@@ -731,9 +730,7 @@ class App:
 
     def research_timing(self):
         try:
-            length, ang_start, ang_end, ang_step, _, _ = (
-                self.parse_research_common()
-            )
+            length, ang_start, ang_end, ang_step, _, _ = self.parse_research_common()
             repeats = int(float(self.entry_repeats.get()))
             if repeats <= 0:
                 raise ValueError("timing repeats must be positive")
@@ -772,9 +769,7 @@ class App:
 
     def research_staircase(self):
         try:
-            length, ang_start, ang_end, ang_step, _, _ = (
-                self.parse_research_common()
-            )
+            length, ang_start, ang_end, ang_step, _, _ = self.parse_research_common()
             algo_name = self.primary_algo.get()
             if algo_name not in self.algorithms:
                 raise ValueError("Select a valid algorithm")
@@ -835,14 +830,10 @@ class App:
         for i, (name, value) in enumerate(items):
             x0 = margin_left + i * bar_w + 8
             x1 = margin_left + (i + 1) * bar_w - 8
-            bar_h = (
-                0 if max_value == 0 else (value / max_value) * (plot_h - 20)
-            )
+            bar_h = 0 if max_value == 0 else (value / max_value) * (plot_h - 20)
             y0 = margin_top + plot_h - bar_h
             y1 = margin_top + plot_h
-            chart.create_rectangle(
-                x0, y0, x1, y1, fill="#3C82F6", outline="#2E5FA8"
-            )
+            chart.create_rectangle(x0, y0, x1, y1, fill="#3C82F6", outline="#2E5FA8")
             chart.create_text((x0 + x1) / 2, y0 - 10, text=f"{value:.1f}")
             chart.create_text(
                 (x0 + x1) / 2,
@@ -898,11 +889,7 @@ class App:
         def map_y(value: float) -> float:
             if y_max == y_min:
                 return margin_top + plot_h / 2
-            return (
-                margin_top
-                + plot_h
-                - (value - y_min) / (y_max - y_min) * plot_h
-            )
+            return margin_top + plot_h - (value - y_min) / (y_max - y_min) * plot_h
 
         screen_points = []
         for angle, step_count in points:
@@ -922,9 +909,7 @@ class App:
             chart.create_line(*screen_points, fill="#EF4444", width=2)
 
         for t in range(6):
-            x_tick_value = (
-                x_min + (x_max - x_min) * t / 5 if x_max != x_min else x_min
-            )
+            x_tick_value = x_min + (x_max - x_min) * t / 5 if x_max != x_min else x_min
             x_tick = map_x(x_tick_value)
             chart.create_line(
                 x_tick, margin_top + plot_h, x_tick, margin_top + plot_h + 5
@@ -933,14 +918,10 @@ class App:
                 x_tick, margin_top + plot_h + 20, text=f"{x_tick_value:.1f}"
             )
 
-            y_tick_value = (
-                y_min + (y_max - y_min) * t / 5 if y_max != y_min else y_min
-            )
+            y_tick_value = y_min + (y_max - y_min) * t / 5 if y_max != y_min else y_min
             y_tick = map_y(y_tick_value)
             chart.create_line(margin_left - 5, y_tick, margin_left, y_tick)
-            chart.create_text(
-                margin_left - 30, y_tick, text=f"{y_tick_value:.0f}"
-            )
+            chart.create_text(margin_left - 30, y_tick, text=f"{y_tick_value:.0f}")
 
         chart.create_text(460, 500, text=x_label)
         chart.create_text(20, 260, text=y_label, angle=90)
