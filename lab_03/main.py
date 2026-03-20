@@ -764,11 +764,16 @@ class App:
 
         times: dict[str, float] = {}
         for algo_name, algo in self.algorithms.items():
-            start = time.perf_counter()
+            start = time.perf_counter_ns()
             for _ in range(repeats):
                 for x0, y0, x1, y1 in vectors:
                     algo(x0, y0, x1, y1)
-            elapsed_ms = (time.perf_counter() - start) * 1000.0
+            elapsed_ms = (
+                (time.perf_counter_ns() - start)
+                / repeats
+                / max(1, len(vectors))
+                / length
+            )
             times[algo_name] = elapsed_ms
 
         self.show_histogram(
@@ -853,7 +858,7 @@ class App:
                 anchor="w",
             )
 
-        chart.create_text(20, margin_top + plot_h / 2, text="ms", angle=90)
+        chart.create_text(20, margin_top + plot_h / 2, text="ns/px", angle=90)
 
     def show_line_graph(
         self,
