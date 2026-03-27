@@ -3,10 +3,10 @@ CANVAS_HEIGHT = 900
 CANVAS_INTERNAL_PADDING = 60
 
 camera_config = {
-    'max_x': 310,
-    'min_x': -5,
-    'max_y': 60,
-    'min_y': 50,
+    "max_x": 310,
+    "min_x": -5,
+    "max_y": 60,
+    "min_y": 50,
 }
 
 
@@ -30,6 +30,7 @@ def show_content(dots, triangles, plot_func, photo_image, canvas):
 
 
 # Internal functions below
+
 
 def draw_dot(dot, plot_func, color="#FFFFFF"):
     cx, cy = convert_to_canvas_navigation(dot.x, dot.y, camera_config)
@@ -84,7 +85,8 @@ def update_limits(parsed_dots):
     min_x, max_x = min(xs), max(xs)
     min_y, max_y = min(ys), max(ys)
 
-    # Handle the "zero range" case (when all dots are on the same line or are a single point)
+    # Handle the "zero range" case (when all dots are on the same line or are
+    # a single point)
     if min_x == max_x and min_y == max_y:
         min_x -= 0.5
         max_x += 0.5
@@ -92,32 +94,39 @@ def update_limits(parsed_dots):
         max_y += 0.5
 
     # Update the global camera_config
-    camera_config['min_x'] = min_x
-    camera_config['max_x'] = max_x
-    camera_config['min_y'] = min_y
-    camera_config['max_y'] = max_y
+    camera_config["min_x"] = min_x
+    camera_config["max_x"] = max_x
+    camera_config["min_y"] = min_y
+    camera_config["max_y"] = max_y
 
     print(f"Limits updated: X({min_x}, {max_x}), Y({min_y}, {max_y})")
 
 
 def convert_to_canvas_navigation(x0, y0, config):
-    x1 = x0 - config['min_x']
-    y1 = y0 - config['min_y']
+    x1 = x0 - config["min_x"]
+    y1 = y0 - config["min_y"]
 
-    canvas_drawable_area = (CANVAS_WIDTH - 2 * CANVAS_INTERNAL_PADDING,
-                            CANVAS_HEIGHT - 2 * CANVAS_INTERNAL_PADDING)
-    area_width = config['max_x'] - config['min_x']
-    area_height = config['max_y'] - config['min_y']
+    canvas_drawable_area = (
+        CANVAS_WIDTH - 2 * CANVAS_INTERNAL_PADDING,
+        CANVAS_HEIGHT - 2 * CANVAS_INTERNAL_PADDING,
+    )
+    area_width = config["max_x"] - config["min_x"]
+    area_height = config["max_y"] - config["min_y"]
 
     if area_width == 0:
         scale = canvas_drawable_area[1] / area_height
     elif area_height == 0:
         scale = canvas_drawable_area[0] / area_width
     else:
-        scale = min(canvas_drawable_area[1] / area_height, canvas_drawable_area[0] / area_width)
+        scale = min(
+            canvas_drawable_area[1] / area_height, canvas_drawable_area[0] / area_width
+        )
 
     canvas_center = (CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2)
-    area_center = ((config['max_x'] - config['min_x']) / 2, (config['max_y'] - config['min_y']) / 2)
+    area_center = (
+        (config["max_x"] - config["min_x"]) / 2,
+        (config["max_y"] - config["min_y"]) / 2,
+    )
 
     x2 = scale * (x1 - area_center[0]) + canvas_center[0]
     y2 = scale * (y1 - area_center[1]) + canvas_center[1]
@@ -143,9 +152,11 @@ class Triangle:
         self.area = self.calculate_area()
 
     def calculate_area(self):
-        return 0.5 * abs(self.a.x * (self.b.y - self.c.y) +
-                         self.b.x * (self.c.y - self.a.y) +
-                         self.c.x * (self.a.y - self.b.y))
+        return 0.5 * abs(
+            self.a.x * (self.b.y - self.c.y)
+            + self.b.x * (self.c.y - self.a.y)
+            + self.c.x * (self.a.y - self.b.y)
+        )
 
     def is_dot_inside(self, p: Dot):
         # A point is strictly inside if it's not a vertex and satisfies area logic

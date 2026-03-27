@@ -48,11 +48,9 @@ def move_picture():
 
         show_content_wrapper()
 
-
     except ValueError:
         messagebox.showerror(
-            "Input Error",
-            "Please enter valid numeric values for ΔX and ΔY."
+            "Input Error", "Please enter valid numeric values for ΔX and ΔY."
         )
 
 
@@ -65,7 +63,8 @@ def scale_picture():
     except ValueError:
         messagebox.showerror(
             "Input Error",
-            "Please enter valid numeric values for X and Y for center of transformation."
+            "Please enter valid numeric values for X and Y "
+            "for center of transformation.",
         )
         return
     current_content.transformation_center = Dot(cx, cy)
@@ -74,22 +73,23 @@ def scale_picture():
     try:
         scale_factor = float(entry_scale.get())
     except ValueError:
-        messagebox.showerror(
-            "Input Error",
-            "Please enter valid float value for scale."
-        )
+        messagebox.showerror("Input Error", "Please enter valid float value for scale.")
         return
 
     last_content = copy.deepcopy(current_content)
     for segment in current_content.segments:
         segment.first_dot.x = (
-                                      segment.first_dot.x - current_content.transformation_center.x) * scale_factor + transformation_center.x
+            segment.first_dot.x - current_content.transformation_center.x
+        ) * scale_factor + transformation_center.x
         segment.second_dot.x = (
-                                       segment.second_dot.x - current_content.transformation_center.x) * scale_factor + transformation_center.x
+            segment.second_dot.x - current_content.transformation_center.x
+        ) * scale_factor + transformation_center.x
         segment.first_dot.y = (
-                                      segment.first_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
+            segment.first_dot.y - current_content.transformation_center.y
+        ) * scale_factor + transformation_center.y
         segment.second_dot.y = (
-                                       segment.second_dot.y - current_content.transformation_center.y) * scale_factor + transformation_center.y
+            segment.second_dot.y - current_content.transformation_center.y
+        ) * scale_factor + transformation_center.y
 
         show_content_wrapper()
 
@@ -128,7 +128,8 @@ def handle_rotate():
     except ValueError:
         messagebox.showerror(
             "Input Error",
-            "Please enter valid numeric values for X and Y for center of transformation."
+            "Please enter valid numeric values for X and Y"
+            " for center of transformation.",
         )
         return
     global transformation_center
@@ -166,7 +167,14 @@ main_container = tk.Frame(root)
 main_container.pack(fill="both", expand=True)
 
 # --- Control Panel Setup ---
-left_frame = tk.Frame(main_container, width=LEFT_PANEL_WIDTH, padx=10, pady=10, relief="ridge", borderwidth=1)
+left_frame = tk.Frame(
+    main_container,
+    width=LEFT_PANEL_WIDTH,
+    padx=10,
+    pady=10,
+    relief="ridge",
+    borderwidth=1,
+)
 left_frame.pack(side="left", fill="y")
 left_frame.pack_propagate(False)
 
@@ -187,7 +195,9 @@ entry_dy = tk.Entry(move_inputs, width=8)
 entry_dy.grid(row=1, column=1, padx=5)
 
 # Move Button
-btn_move = tk.Button(linear_transformation_frame, text="move", width=20, command=move_picture)
+btn_move = tk.Button(
+    linear_transformation_frame, text="move", width=20, command=move_picture
+)
 btn_move.pack(pady=10)
 
 # Separator line
@@ -197,7 +207,9 @@ tk.Frame(left_frame, height=2, bd=1, relief="sunken").pack(fill="x", pady=10)
 relative_transformation_frame = tk.Frame(left_frame, padx=10, pady=10)
 relative_transformation_frame.pack(side="top", fill="x")
 
-tk.Label(relative_transformation_frame, text="centers:", font=("Arial", 10, "bold")).pack()
+tk.Label(
+    relative_transformation_frame, text="centers:", font=("Arial", 10, "bold")
+).pack()
 
 # Center X and Center Y Row
 center_inputs = tk.Frame(relative_transformation_frame)
@@ -236,19 +248,16 @@ btn_scale.pack(side="left", expand=True, padx=2)
 tk.Frame(left_frame, height=2, bd=1, relief="sunken").pack(fill="x", pady=10)
 
 btn_undo = tk.Button(
-    left_frame,
-    text="Undo",
-    width=20,
-    height=2,
-    bg="#00ff00",
-    command=handle_undo
+    left_frame, text="Undo", width=20, height=2, bg="#00ff00", command=handle_undo
 )
 btn_undo.pack(side="bottom", pady=10)
 
 # Canvas
 right_frame = tk.Frame(main_container, padx=10, pady=10)
 right_frame.pack(side="left", fill="both", expand=True)
-canvas = tk.Canvas(right_frame, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, background="#000000")
+canvas = tk.Canvas(
+    right_frame, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, background="#000000"
+)
 canvas.pack(fill="both", expand=True)
 img = tk.PhotoImage(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
 canvas.create_image((0, 0), image=img, anchor="nw")
@@ -259,13 +268,7 @@ def put_pixel(x, y, color="#FFFFFF", text: str = ""):
         if not text:
             img.put(color, (x, y))
         else:
-            canvas.create_text(
-                x,
-                y,
-                text=text,
-                fill=color,
-                anchor="sw"
-            )
+            canvas.create_text(x, y, text=text, fill=color, anchor="sw")
 
 
 show_content_wrapper()
