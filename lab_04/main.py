@@ -339,6 +339,7 @@ class PlotCanvas:
         )
         self.canvas.pack(fill="both", expand=True)
         self.bg_color = "#000000"
+        self.axis_color = "#444444"
         self.virtual_pixel_size = 8
         self.clear(self.bg_color)
 
@@ -358,7 +359,65 @@ class PlotCanvas:
             outline=self.bg_color,
             tags="background",
         )
+        self._draw_grid()
         self._draw_axes()
+
+    def _draw_grid(self):
+        size = self.virtual_pixel_size
+        cx = CANVAS_WIDTH // 2
+        cy = CANVAS_HEIGHT // 2
+
+        x = cx + size
+        while x <= CANVAS_WIDTH:
+            self.canvas.create_line(
+                x,
+                0,
+                x,
+                CANVAS_HEIGHT,
+                fill=self.axis_color,
+                width=1,
+                tags="overlay",
+            )
+            x += size
+
+        x = cx - size
+        while x >= 0:
+            self.canvas.create_line(
+                x,
+                0,
+                x,
+                CANVAS_HEIGHT,
+                fill=self.axis_color,
+                width=1,
+                tags="overlay",
+            )
+            x -= size
+
+        y = cy + size
+        while y <= CANVAS_HEIGHT:
+            self.canvas.create_line(
+                0,
+                y,
+                CANVAS_WIDTH,
+                y,
+                fill=self.axis_color,
+                width=1,
+                tags="overlay",
+            )
+            y += size
+
+        y = cy - size
+        while y >= 0:
+            self.canvas.create_line(
+                0,
+                y,
+                CANVAS_WIDTH,
+                y,
+                fill=self.axis_color,
+                width=1,
+                tags="overlay",
+            )
+            y -= size
 
     def _draw_axes(self):
         cx = CANVAS_WIDTH // 2
@@ -368,7 +427,7 @@ class PlotCanvas:
             cy,
             CANVAS_WIDTH,
             cy,
-            fill="#444444",
+            fill=self.axis_color,
             width=1,
             tags="overlay",
         )
@@ -377,7 +436,7 @@ class PlotCanvas:
             0,
             cx,
             CANVAS_HEIGHT,
-            fill="#444444",
+            fill=self.axis_color,
             width=1,
             tags="overlay",
         )
