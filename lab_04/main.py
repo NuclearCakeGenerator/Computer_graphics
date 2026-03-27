@@ -1220,6 +1220,8 @@ class App:
         radii = list(range(r_start, r_end + 1, r_step))
         series: dict[str, list[tuple[float, float]]] = {}
         for algo_name, algo in self.circle_algorithms.items():
+            if algo_name == "Library (Pillow)":
+                continue
             points: list[tuple[float, float]] = []
             for radius in radii:
                 start = time.perf_counter_ns()
@@ -1254,6 +1256,8 @@ class App:
 
         series: dict[str, list[tuple[float, float]]] = {}
         for algo_name, algo in self.ellipse_algorithms.items():
+            if algo_name == "Library (Pillow)":
+                continue
             points: list[tuple[float, float]] = []
             for a, b in sizes:
                 x_value = float(a if axis == "a" else b)
